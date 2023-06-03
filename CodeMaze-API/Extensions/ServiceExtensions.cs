@@ -1,4 +1,5 @@
-﻿using Contacts.Interfaces;
+﻿using CodeMaze_API.Formatter;
+using Contacts.Interfaces;
 using LoggerService;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -57,6 +58,9 @@ namespace CodeMaze_API.Extensions
             //services.AddSqlServer<RepositoryContext>(configuration.GetConnectionString("SQL-Server"));
         }
 
-        
+        public static IMvcBuilder AddCustomCSVFormatter(this IMvcBuilder builder)
+        {
+            return builder.AddMvcOptions(config => config.OutputFormatters.Add(new CsvOutputFormater()));
+        }
     }
 }

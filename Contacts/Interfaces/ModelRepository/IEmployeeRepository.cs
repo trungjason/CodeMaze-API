@@ -7,5 +7,7 @@ namespace Contacts.Interfaces.ModelRepository
         IEnumerable<Employee> GetAllEmployees(Guid companyId, bool trackChanges);
 
         Employee GetEmployee(Guid companyId, Guid id, bool trackChanges);
+
+        void CreateEmployee(Guid companyId, Employee employee);
     }
 }

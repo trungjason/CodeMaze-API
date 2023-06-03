@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Service.Contracts;
+using Shared.DataTransferObjects;
 
 namespace Presentation.Controllers
 {
@@ -22,12 +23,23 @@ namespace Presentation.Controllers
             return Ok(companies);
         }
 
-        [HttpGet("{id:guid}")]
+        [HttpGet("{id:guid}", Name = "CompanyById")]
         public IActionResult GetCompany(Guid id)
         {
             var company = _serviceManager.CompanyService.GetCompany(id, trackChanges: false);
 
             return Ok(company);
+        }
+
+        [HttpPost]
+        public IActionResult CreateCompany([FromBody] CreateCompanyDTO company)
+        {
+            if (company is null)
+                return BadRequest("CreateCompanyDTO object is null");
+
+            var createdCompany = _serviceManager.CompanyService.CreateCompany(company);
+
+            return CreatedAtAction("CompanyById", new { id = createdCompany.Id}, createdCompany);
         }
     }
 }

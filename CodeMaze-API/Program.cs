@@ -1,6 +1,7 @@
 using CodeMaze_API.Extensions;
 using Contacts.Interfaces;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc;
 using NLog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,16 +19,29 @@ builder.Services.ConfigureSqlContext(builder.Configuration);
 
 builder.Services.AddAutoMapper(typeof(Program));
 
-builder.Services.AddControllers()
-        .AddApplicationPart(typeof(Presentation.AssemblyReference).Assembly);
+builder.Services.AddControllers(options =>
+{
+    options.RespectBrowserAcceptHeader = true;
+    options.ReturnHttpNotAcceptable = true;
+})
+    .AddXmlDataContractSerializerFormatters()
+    .AddCustomCSVFormatter()
+    .AddApplicationPart(typeof(Presentation.AssemblyReference).Assembly);
 
-
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    // This will disable default validate model state when using [ApiController] Attribute
+    // => It will allow us to return customer error message
+    options.SuppressModelStateInvalidFilter = true;
+});
 // ----- HTTP Request Pipeline
 var app = builder.Build();
 
 var logger = app.Services.GetService<ILoggerManager>();
 
+// Can't use app.UseDeveloperExceptionPage(); because this is WEB API
 app.ConfigureExceptionHandler(logger);
+
 if (app.Environment.IsProduction())
 {
     app.UseHsts();

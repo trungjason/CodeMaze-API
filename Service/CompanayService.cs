@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Contacts.Interfaces;
 using Entities.Exceptions;
+using Entities.Models;
 using Service.Contracts;
 using Shared.DataTransferObjects;
 
@@ -42,6 +43,18 @@ namespace Service
             }
 
             var companyDTO = _mapper.Map<CompanyDTO>(company);
+
+            return companyDTO;
+        }
+
+        public CompanyDTO CreateCompany(CreateCompanyDTO createCompanyDTO)
+        {
+            var companyEntity = _mapper.Map<Company>(createCompanyDTO);
+
+            _repository.Company.CreateCompany(companyEntity);
+            _repository.Save();
+
+            var companyDTO = _mapper.Map<CompanyDTO>(companyEntity);
 
             return companyDTO;
         }

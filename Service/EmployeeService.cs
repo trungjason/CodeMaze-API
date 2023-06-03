@@ -24,6 +24,25 @@ namespace Service
             _mapper = mapper;
         }
 
+        public EmployeeDTO CreateEmployee(Guid companyId, CreateEmployeeDTO createEmployeeDTO, bool trackChanges)
+        {
+            var company = _repository.Company.GetCompany(companyId, trackChanges);
+
+            if (company is null)
+            {
+                throw new CompanyNotFoundException(companyId);
+            };
+
+            var employeeEntity = _mapper.Map<Employee>(createEmployeeDTO);
+
+            _repository.Employee.CreateEmployee(companyId, employeeEntity);
+            _repository.Save();
+
+            var employeeToReturn = _mapper.Map<EmployeeDTO>(employeeEntity);
+
+            return employeeToReturn;
+        }
+
         public IEnumerable<EmployeeDTO> GetAllEmployees(Guid companyId, bool trackChanges)
         {
             var company = _repository.Company.GetCompany(companyId, trackChanges);

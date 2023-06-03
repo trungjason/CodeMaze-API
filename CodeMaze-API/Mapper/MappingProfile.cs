@@ -9,11 +9,14 @@ namespace CodeMaze_API.Mapper
         public MappingProfile() 
         {
             CreateMap<Company, CompanyDTO>()
-                .ForCtorParam("FullAddress",
+                .ForMember("FullAddress",
                     option => option.MapFrom(company => string.Join(" ", company.Address, company.Country))
                 );
 
             CreateMap<Employee, EmployeeDTO>();
+
+            CreateMap<CreateCompanyDTO, Company>();
+            CreateMap<CreateEmployeeDTO, Employee>();
         }
     }
 }

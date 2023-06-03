@@ -18,5 +18,10 @@ namespace Repository.ModelRepository
         {
             return FindByCondition(company => company.Id.Equals(id), trackChanges).SingleOrDefault();
         }
+
+        public void CreateCompany(Company company)
+        {
+            Create(company);
+        }
     }
 }
