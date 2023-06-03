@@ -1,4 +1,6 @@
 using CodeMaze_API.Extensions;
+using Contacts.Interfaces;
+using Microsoft.AspNetCore.HttpOverrides;
 using NLog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,19 +25,21 @@ builder.Services.AddControllers()
 // ----- HTTP Request Pipeline
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-}
-else
+var logger = app.Services.GetService<ILoggerManager>();
+
+app.ConfigureExceptionHandler(logger);
+if (app.Environment.IsProduction())
 {
     app.UseHsts();
 }
 
-app.UseForwardedHeaders();
 app.UseHttpsRedirection();
+app.UseForwardedHeaders(new ForwardedHeadersOptions()
+{
+    ForwardedHeaders = ForwardedHeaders.All
+});
 
-app.UseRouting();
+app.UseCors("MyCorsPolicy");
 
 app.MapControllers();
 

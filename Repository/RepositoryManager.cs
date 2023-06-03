@@ -1,11 +1,6 @@
 ﻿using Contacts.Interfaces;
 using Contacts.Interfaces.ModelRepository;
 using Repository.ModelRepository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Repository
 {

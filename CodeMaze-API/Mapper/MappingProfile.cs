@@ -12,6 +12,8 @@ namespace CodeMaze_API.Mapper
                 .ForCtorParam("FullAddress",
                     option => option.MapFrom(company => string.Join(" ", company.Address, company.Country))
                 );
+
+            CreateMap<Employee, EmployeeDTO>();
         }
     }
 }

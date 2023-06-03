@@ -56,5 +56,7 @@ namespace CodeMaze_API.Extensions
             // Shouldn't use this approach because it will be hard to config more AddDbContext options
             //services.AddSqlServer<RepositoryContext>(configuration.GetConnectionString("SQL-Server"));
         }
+
+        
     }
 }

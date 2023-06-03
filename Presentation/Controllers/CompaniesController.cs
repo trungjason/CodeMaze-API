@@ -16,17 +16,18 @@ namespace Presentation.Controllers
 
         [HttpGet]
         public IActionResult GetCompanies() 
-        { 
-            try
-            {
-                var companies = _serviceManager.CompanyService.GetAllCompanies(trackChanges: false);
+        {
+            var companies = _serviceManager.CompanyService.GetAllCompanies(trackChanges: false);
 
-                return Ok(companies);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            return Ok(companies);
+        }
+
+        [HttpGet("{id:guid}")]
+        public IActionResult GetCompany(Guid id)
+        {
+            var company = _serviceManager.CompanyService.GetCompany(id, trackChanges: false);
+
+            return Ok(company);
         }
     }
 }
