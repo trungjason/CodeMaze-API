@@ -1,6 +1,7 @@
 ﻿using Contacts.Interfaces;
 using Entities.ErrorModels;
 using Entities.Exceptions;
+using Entities.Exceptions.BaseException;
 using Microsoft.AspNetCore.Diagnostics;
 using System.Net;
 
@@ -26,6 +27,7 @@ namespace CodeMaze_API.Extensions
                         context.Response.StatusCode = contextFeature.Error switch
                         {
                             NotFoundException => StatusCodes.Status404NotFound,
+                            BadRequestException => StatusCodes.Status400BadRequest,
                             _ => StatusCodes.Status500InternalServerError
                         };
 

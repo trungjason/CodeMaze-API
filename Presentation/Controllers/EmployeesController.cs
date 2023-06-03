@@ -8,6 +8,24 @@ namespace Presentation.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
+        #region Constructor
+        #endregion
+
+        #region Get All
+        #endregion
+
+        #region Get By
+        #endregion
+
+        #region Create
+        #endregion
+
+        #region Update
+        #endregion
+
+        #region Delete
+        #endregion
+
         private readonly IServiceManager _serviceManager;
 
         public EmployeesController(IServiceManager serviceManager) 
@@ -38,7 +56,7 @@ namespace Presentation.Controllers
             {
                 return BadRequest("EmployeeForCreationDto object is null");
             }
-            var employeeToReturn = _serviceManager.EmployeeService.CreateEmployee(companyId, createEmployeeDTO, 
+            var employeeToReturn = _serviceManager.EmployeeService.CreateEmployeeForCompany(companyId, createEmployeeDTO, 
                 trackChanges: false
             );
             return CreatedAtRoute("GetEmployeeForCompany", new

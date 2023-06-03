@@ -9,6 +9,24 @@ namespace Service
 {
     internal sealed class EmployeeService : IEmployeeService
     {
+        #region Constructor
+        #endregion
+
+        #region Get All
+        #endregion
+
+        #region Get By
+        #endregion
+
+        #region Create
+        #endregion
+
+        #region Update
+        #endregion
+
+        #region Delete
+        #endregion
+
         private readonly IRepositoryManager _repository;
         private readonly ILoggerManager _logger;
         private readonly IMapper _mapper;
@@ -24,7 +42,7 @@ namespace Service
             _mapper = mapper;
         }
 
-        public EmployeeDTO CreateEmployee(Guid companyId, CreateEmployeeDTO createEmployeeDTO, bool trackChanges)
+        public EmployeeDTO CreateEmployeeForCompany(Guid companyId, CreateEmployeeDTO createEmployeeDTO, bool trackChanges)
         {
             var company = _repository.Company.GetCompany(companyId, trackChanges);
 
@@ -35,7 +53,7 @@ namespace Service
 
             var employeeEntity = _mapper.Map<Employee>(createEmployeeDTO);
 
-            _repository.Employee.CreateEmployee(companyId, employeeEntity);
+            _repository.Employee.CreateEmployeeForCompany(companyId, employeeEntity);
             _repository.Save();
 
             var employeeToReturn = _mapper.Map<EmployeeDTO>(employeeEntity);

@@ -21,8 +21,8 @@
     },
     "IIS Express": {
       "commandName": "IISExpress",
-      "launchBrowser": true,
-      "launchUrl": "weatherforecast",
+      "launchBrowser": false,
+      "launchUrl": "api/companies",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

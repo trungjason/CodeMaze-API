@@ -12,5 +12,5 @@
         public string? FullAddress { get; init; }
     };
 
-    public record CreateCompanyDTO (string Name, string Address, string Country);
+    public record CreateCompanyDTO (string Name, string Address, string Country, IEnumerable<CreateEmployeeDTO> Employees);
 }

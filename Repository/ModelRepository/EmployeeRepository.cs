@@ -5,11 +5,29 @@ namespace Repository.ModelRepository
 {
     public class EmployeeRepository : RepositoryBase<Employee>, IEmployeeRepository
     {
+        #region Constructor
+        #endregion
+
+        #region Get All
+        #endregion
+
+        #region Get By
+        #endregion
+
+        #region Create
+        #endregion
+
+        #region Update
+        #endregion
+
+        #region Delete
+        #endregion
+
         public EmployeeRepository(RepositoryContext repositoryContext) : base(repositoryContext)
         {
         }
 
-        public void CreateEmployee(Guid companyId, Employee employee)
+        public void CreateEmployeeForCompany(Guid companyId, Employee employee)
         {
             employee.CompanyId = companyId;
             Create(employee);
