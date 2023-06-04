@@ -5,25 +5,27 @@ namespace Service.Contracts
     public interface ICompanyService
     {
         #region Get All
-        IEnumerable<CompanyDTO> GetAllCompanies(bool trackChanges);
-
-        IEnumerable<CompanyDTO> GetByIds(IEnumerable<Guid> ids, bool trackChanges);
+        Task<IEnumerable<CompanyDTO>> GetAllCompaniesAsync(bool trackChanges);
+    
+        Task<IEnumerable<CompanyDTO>> GetByIdsAsync(IEnumerable<Guid> ids, bool trackChanges);
         #endregion
 
         #region Get By
-        CompanyDTO GetCompany(Guid id, bool trackChanges);
+        Task<CompanyDTO> GetCompanyAsync(Guid id, bool trackChanges);
         #endregion
 
         #region Create
-        CompanyDTO CreateCompany(CreateCompanyDTO createCompanyDTO);
+        Task<CompanyDTO> CreateCompanyAsync(CreateCompanyDTO createCompanyDTO);
 
-        (IEnumerable<CompanyDTO> companies, string ids) CreateCompanyCollection(IEnumerable<CreateCompanyDTO> companyCollection);
+        Task<(IEnumerable<CompanyDTO> companies, string ids)> CreateCompanyCollectionAsync(IEnumerable<CreateCompanyDTO> companyCollection);
         #endregion
 
         #region Update
+        Task UpdateCompanyAsync(Guid companyId, UpdateCompanyDTO updateCompanyDTO, bool trackChanges);
         #endregion
 
         #region Delete
+        Task DeleteCompanyAsync(Guid companyId, bool trackChanges);
         #endregion
     }
 }

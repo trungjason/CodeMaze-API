@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Presentation.ActionFilters;
 using Presentation.ModelBinders;
 using Service.Contracts;
 using Shared.DataTransferObjects;
@@ -20,19 +21,19 @@ namespace Presentation.Controllers
 
         #region Get All
         [HttpGet]
-        public IActionResult GetCompanies()
+        public async Task<IActionResult> GetCompanies()
         {
-            var companies = _serviceManager.CompanyService.GetAllCompanies(trackChanges: false);
+            var companies = await _serviceManager.CompanyService.GetAllCompaniesAsync(trackChanges: false);
 
             return Ok(companies);
         }
 
         [HttpGet("collection/({ids})", Name = "CompanyCollection")]
-        public IActionResult GetCompanyCollection(
+        public async Task<IActionResult> GetCompanyCollection(
             [ModelBinder(BinderType = typeof(ArrayModelBinder))]
             IEnumerable<Guid> ids)
         {
-            var companies = _serviceManager.CompanyService.GetByIds(ids, trackChanges: false);
+            var companies = await _serviceManager.CompanyService.GetByIdsAsync(ids, trackChanges: false);
 
             return Ok(companies);
         }
@@ -40,9 +41,9 @@ namespace Presentation.Controllers
 
         #region Get By
         [HttpGet("{id:guid}", Name = "CompanyById")]
-        public IActionResult GetCompany(Guid id)
+        public async Task<IActionResult> GetCompany(Guid id)
         {
-            var company = _serviceManager.CompanyService.GetCompany(id, trackChanges: false);
+            var company = await _serviceManager.CompanyService.GetCompanyAsync(id, trackChanges: false);
 
             return Ok(company);
         }
@@ -50,29 +51,42 @@ namespace Presentation.Controllers
 
         #region Create
         [HttpPost]
-        public IActionResult CreateCompany([FromBody] CreateCompanyDTO company)
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        public async Task<IActionResult> CreateCompany([FromBody] CreateCompanyDTO createCompanyDTO)
         {
-            if (company is null)
-                return BadRequest("CreateCompanyDTO object is null");
-
-            var createdCompany = _serviceManager.CompanyService.CreateCompany(company);
+            var createdCompany = await _serviceManager.CompanyService.CreateCompanyAsync(createCompanyDTO);
 
             return CreatedAtRoute("CompanyById", new { id = createdCompany.Id }, createdCompany);
         }
 
         [HttpPost("collection")]
-        public IActionResult CreateCompayCollection([FromBody] IEnumerable<CreateCompanyDTO> companyCollection)
+        public async Task<IActionResult> CreateCompayCollection([FromBody] IEnumerable<CreateCompanyDTO> companyCollection)
         {
-            var result = _serviceManager.CompanyService.CreateCompanyCollection(companyCollection);
+            var result = await _serviceManager.CompanyService.CreateCompanyCollectionAsync(companyCollection);
 
             return CreatedAtRoute("CompanyCollection", new { result.ids }, result.companies);
         }
         #endregion
 
         #region Update
+        [HttpPut("{id:guid}")]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        public async Task<IActionResult> UpdateCompany(Guid id, [FromBody] UpdateCompanyDTO updateCompanyDTO)
+        {
+            await _serviceManager.CompanyService.UpdateCompanyAsync(id, updateCompanyDTO, trackChanges: true);
+
+            return NoContent();
+        }
         #endregion
 
         #region Delete
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> DeleteCompany(Guid id)
+        {
+           await _serviceManager.CompanyService.DeleteCompanyAsync(id, false);
+
+            return NoContent();
+        }
         #endregion
     }
 }

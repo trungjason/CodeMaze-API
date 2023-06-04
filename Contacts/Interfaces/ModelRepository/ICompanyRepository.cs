@@ -4,30 +4,29 @@ namespace Contacts.Interfaces.ModelRepository
 {
     public interface ICompanyRepository
     {
-        #region Constructor
-        #endregion
-
         #region Get All
+        Task<IEnumerable<Company>> GetAllCompaniesAsync(bool trackChanges);
+        
+        Task<IEnumerable<Company>> GetByIdsAsync(IEnumerable<Guid> ids, bool trackChanges);
         #endregion
 
         #region Get By
+        Task<Company> GetCompanyAsync(Guid id, bool trackChanges);
         #endregion
 
+        // We don't add Task to Create and Delete function
+        // because we don't do any async code in these function
+        // we only set state of entity to Added or Deleted
         #region Create
+        void CreateCompany(Company company);
         #endregion
 
         #region Update
+        
         #endregion
 
         #region Delete
+        void DeleteCompany(Company company);
         #endregion
-
-        IEnumerable<Company> GetAllCompanies(bool trackChanges);
-
-        IEnumerable<Company> GetByIds(IEnumerable<Guid> ids, bool trackChanges);
-
-        Company GetCompany(Guid id, bool trackChanges);
-
-        void CreateCompany(Company company);
     }
 }

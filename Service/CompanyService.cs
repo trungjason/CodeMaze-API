@@ -28,9 +28,9 @@ namespace Service
         #endregion
 
         #region Get All
-        public IEnumerable<CompanyDTO> GetAllCompanies(bool trackChanges)
+        public async Task<IEnumerable<CompanyDTO>> GetAllCompaniesAsync(bool trackChanges)
         {
-            var companies = _repository.Company.GetAllCompanies(trackChanges);
+            var companies = await _repository.Company.GetAllCompaniesAsync(trackChanges);
 
             var companiesDTO = _mapper.Map<IEnumerable<CompanyDTO>>(companies);
 
@@ -39,28 +39,23 @@ namespace Service
         #endregion
 
         #region Get By
-        public CompanyDTO GetCompany(Guid id, bool trackChanges)
+        public async Task<CompanyDTO> GetCompanyAsync(Guid companyId, bool trackChanges)
         {
-            var company = _repository.Company.GetCompany(id, trackChanges);
-
-            if (company == null)
-            {
-                throw new CompanyNotFoundException(id);
-            }
+            var company = await _GetCompanyAndCheckIfItExists(companyId, trackChanges);
 
             var companyDTO = _mapper.Map<CompanyDTO>(company);
 
             return companyDTO;
         }
 
-        public IEnumerable<CompanyDTO> GetByIds(IEnumerable<Guid> ids, bool trackChanges)
+        public async Task<IEnumerable<CompanyDTO>> GetByIdsAsync(IEnumerable<Guid> ids, bool trackChanges)
         {
             if (ids is null)
             {
                 throw new IdParametersBadRequestException();
             };
 
-            var companyEntities = _repository.Company.GetByIds(ids, trackChanges);
+            var companyEntities = await _repository.Company.GetByIdsAsync(ids, trackChanges);
 
             if (ids.Count() != companyEntities.Count())
             {
@@ -74,19 +69,19 @@ namespace Service
         #endregion
 
         #region Create
-        public CompanyDTO CreateCompany(CreateCompanyDTO createCompanyDTO)
+        public async Task<CompanyDTO> CreateCompanyAsync(CreateCompanyDTO createCompanyDTO)
         {
             var companyEntity = _mapper.Map<Company>(createCompanyDTO);
 
-            _repository.Company.CreateCompany(companyEntity);
-            _repository.Save();
+             _repository.Company.CreateCompany(companyEntity);
+            await _repository.SaveAsync();
 
             var companyDTO = _mapper.Map<CompanyDTO>(companyEntity);
 
             return companyDTO;
         }
 
-        public (IEnumerable<CompanyDTO> companies, string ids) CreateCompanyCollection(IEnumerable<CreateCompanyDTO> companyCollection)
+        public async Task<(IEnumerable<CompanyDTO> companies, string ids)> CreateCompanyCollectionAsync(IEnumerable<CreateCompanyDTO> companyCollection)
         {
             if (companyCollection is null)
             {
@@ -100,7 +95,7 @@ namespace Service
                 _repository.Company.CreateCompany(companyEntity);
             };
 
-            _repository.Save();
+            await _repository.SaveAsync();
 
             var companyCollectionDTO = _mapper.Map<IEnumerable<CompanyDTO>>(companyEntities);
 
@@ -111,9 +106,35 @@ namespace Service
         #endregion
 
         #region Update
+        public async Task UpdateCompanyAsync(Guid companyId, UpdateCompanyDTO updateCompanyDTO, bool trackChanges)
+        {
+            var companyEntity = await _GetCompanyAndCheckIfItExists(companyId, trackChanges);
+
+            _mapper.Map(updateCompanyDTO, companyEntity);
+            await _repository.SaveAsync();
+        }
         #endregion
 
         #region Delete
+        public async Task DeleteCompanyAsync(Guid companyId, bool trackChanges)
+        {
+            var companyEntity = await _GetCompanyAndCheckIfItExists(companyId, trackChanges);
+
+            _repository.Company.DeleteCompany(companyEntity);
+            await _repository.SaveAsync();
+        }
+        #endregion
+
+        #region Methods
+        private async Task<Company> _GetCompanyAndCheckIfItExists(Guid id, bool trackChanges)
+        {
+            var company = await _repository.Company.GetCompanyAsync(id, trackChanges);
+
+            if (company is null)
+                throw new CompanyNotFoundException(id);
+
+            return company;
+        }
         #endregion
     }
 }

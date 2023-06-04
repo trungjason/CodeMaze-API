@@ -8,6 +8,6 @@ namespace Contacts.Interfaces
 
         ICompanyRepository Company { get; }
 
-        void Save();
+        Task SaveAsync();
     }
 }

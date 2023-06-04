@@ -13,4 +13,6 @@
     };
 
     public record CreateCompanyDTO (string Name, string Address, string Country, IEnumerable<CreateEmployeeDTO> Employees);
+
+    public record UpdateCompanyDTO(string Name, string Address, string Country, IEnumerable<CreateEmployeeDTO> Employees);
 }

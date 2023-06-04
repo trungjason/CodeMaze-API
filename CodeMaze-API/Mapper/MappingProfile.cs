@@ -16,7 +16,12 @@ namespace CodeMaze_API.Mapper
             CreateMap<Employee, EmployeeDTO>();
 
             CreateMap<CreateCompanyDTO, Company>();
+            CreateMap<UpdateCompanyDTO, Company>();
+
             CreateMap<CreateEmployeeDTO, Employee>();
+
+            // ReverseMap() allow to map from Destination -> Source without create another CreateMap<>
+            CreateMap<UpdateEmployeeDTO, Employee>().ReverseMap();
         }
     }
 }

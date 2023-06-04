@@ -3,13 +3,25 @@ using Contacts.Interfaces;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using NLog;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Options;
+using Presentation.ActionFilters;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ----- Setup ------
 LogManager.LoadConfiguration(string.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
 
+// Local function: This function configures support for JSON Patch using 
+// Newtonsoft.Json while leaving the other formatters unchanged.
+NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter() =>
+    new ServiceCollection().AddLogging().AddMvc().AddNewtonsoftJson()
+        .Services.BuildServiceProvider()
+        .GetRequiredService<IOptions<MvcOptions>>().Value.InputFormatters
+        .OfType<NewtonsoftJsonPatchInputFormatter>().First();
+
 // Add services to the container.
-// ----- Extensions Service ----
+// ----- Extensions Service -----
 builder.Services.ConfigureCors();
 builder.Services.ConfigureISSIntegration();
 builder.Services.ConfigureLoggerService();
@@ -17,12 +29,17 @@ builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureSqlContext(builder.Configuration);
 
+// ----- Filter -----
+builder.Services.AddScoped<ValidationFilterAttribute>();
+
 builder.Services.AddAutoMapper(typeof(Program));
 
-builder.Services.AddControllers(options =>
+builder.Services.AddControllers(configs =>
 {
-    options.RespectBrowserAcceptHeader = true;
-    options.ReturnHttpNotAcceptable = true;
+    configs.RespectBrowserAcceptHeader = true;
+    configs.ReturnHttpNotAcceptable = true;
+
+    configs.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
 })
     .AddXmlDataContractSerializerFormatters()
     .AddCustomCSVFormatter()
