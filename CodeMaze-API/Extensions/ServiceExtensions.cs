@@ -9,6 +9,11 @@ using Repository;
 using Service;
 using Service.Contracts;
 using Azure;
+using Microsoft.AspNetCore.Mvc.Versioning;
+using Presentation.Controllers.V2;
+using Presentation.Controllers;
+using Marvin.Cache.Headers;
+using AspNetCoreRateLimit;
 
 namespace CodeMaze_API.Extensions
 {
@@ -107,6 +112,67 @@ namespace CodeMaze_API.Extensions
                         .Add("application/vnd.codemaze.apiroot+xml");
                 };
             });
+        }
+
+        public static void ConfigureVersioning(this IServiceCollection services)
+        {
+            services.AddApiVersioning(opt =>
+            {
+                // adds the API version to the response header.
+                opt.ReportApiVersions = true;
+
+                //It specifies the default API version if the client doesn’t send one.
+                opt.AssumeDefaultVersionWhenUnspecified = true;
+
+                // Set DefaultAPI version
+                opt.DefaultApiVersion = new ApiVersion(1, 0);
+
+                // We can choose which api version to use by setting
+                // api-version header or using URI to specify API version
+                opt.ApiVersionReader = new HeaderApiVersionReader("api-version");
+
+                // If we don't want to apply [ApiVersion] Attribute to all
+                // controller that we have. 
+                // We can config their version in this function like below 
+                opt.Conventions.Controller<CompaniesController>()
+                                .HasApiVersion(new ApiVersion(1, 0));
+
+                opt.Conventions.Controller<CompaniesV2Controller>()
+                                .HasDeprecatedApiVersion(new ApiVersion(2, 0));
+
+            });
+        }
+
+        public static void ConfigureResponseCaching(this IServiceCollection services) =>
+                services.AddResponseCaching();
+
+        public static void ConfigureHttpCacheHeaders(this IServiceCollection services) =>
+                services.AddHttpCacheHeaders((expirationOpt) =>
+                {
+                    expirationOpt.MaxAge = 65;
+                    expirationOpt.CacheLocation = CacheLocation.Private;
+                },(validationOpt) => {
+                    validationOpt.MustRevalidate = true;
+                });
+
+        public static void ConfigureRateLimitingOptions(this IServiceCollection services)
+        {
+            var rateLimitRules = new List<RateLimitRule> {
+                new RateLimitRule {
+                    Endpoint = "*",
+                    Limit = 3,
+                    Period = "5m"
+                }
+            };
+
+            services.Configure<IpRateLimitOptions>(opt => {
+                opt.GeneralRules = rateLimitRules;
+            });
+
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+            services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
         }
 
     }

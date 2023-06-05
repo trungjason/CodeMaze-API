@@ -9,7 +9,12 @@ using System.Text.Json;
 namespace Presentation.Controllers
 {
     [ApiController]
+    [ApiVersion("1.0")]
     [Route("api/[controller]")]
+    // Check Service config to know why 120SecondsDuration
+    // This will apply to all action except GetCompanies because we specify an 
+    // another Cache Attribute there => it will override this setting
+    [ResponseCache(CacheProfileName = "120SecondsDuration")]
     public class CompaniesController : ControllerBase
     {
         #region Constructor
@@ -28,6 +33,9 @@ namespace Presentation.Controllers
         //and recent modifications of the resource. The response must be exactly like GET Method
         // but without body response
         [HttpHead]
+        // This will add Header 'Cache-Control' to cache at client
+        [ResponseCache(Duration = 60)]
+        
         public async Task<IActionResult> GetCompanies([FromQuery] CompanyParameters companyParameters)
         {
             var companiesWithMetaData = await _serviceManager.CompanyService.GetAllCompaniesAsync(companyParameters, trackChanges: false);

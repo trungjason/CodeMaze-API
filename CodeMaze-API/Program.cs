@@ -9,6 +9,7 @@ using Presentation.ActionFilters;
 using Service.DataShaping;
 using Shared.DataTransferObjects;
 using CodeMaze_API.Utility;
+using AspNetCoreRateLimit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,7 +32,12 @@ builder.Services.ConfigureLoggerService();
 builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureSqlContext(builder.Configuration);
-
+// -- API Versioning
+builder.Services.ConfigureVersioning();
+// -- Caching
+builder.Services.ConfigureResponseCaching();
+builder.Services.ConfigureHttpCacheHeaders();
+// -- HATEOAS
 builder.Services.AddCustomMediaTypes();
 
 // ----- Filter -----
@@ -50,14 +56,28 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     // => It will allow us to return customer error message
     options.SuppressModelStateInvalidFilter = true;
 });
+// ----- Rate Limit ----- (Because RateLimit use Mememory to store options, counter, rules)
+// => We have to enable memoryCache
+builder.Services.AddMemoryCache();
+builder.Services.ConfigureRateLimitingOptions();
+builder.Services.AddHttpContextAccessor();
+
 
 // ----- Controller Config -----
 builder.Services.AddControllers(configs =>
 {
+    // RespectBroweser Accept Header told our server 
+    // to read Accept header and choose the right InputFormatter.
+    // If we don't set to true the default InputFormatter will always be JSON
     configs.RespectBrowserAcceptHeader = true;
     configs.ReturnHttpNotAcceptable = true;
 
     configs.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
+
+    // We don't have to config ResponsCaching attribute at all Action in Controller
+    // we can create a CacheProfile with all setting and option that we want to config
+    // then in Action we can reuse this CacheProfile
+    configs.CacheProfiles.Add("120SecondsDuration", new CacheProfile { Duration = 120 });
 })
     .AddXmlDataContractSerializerFormatters()
     .AddCustomCSVFormatter()
@@ -82,7 +102,13 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions()
     ForwardedHeaders = ForwardedHeaders.All
 });
 
+app.UseIpRateLimiting();
+
 app.UseCors("MyCorsPolicy");
+
+// Microsoft recommend we should use responseCaching after CORS middleware
+app.UseResponseCaching();
+app.UseHttpCacheHeaders();
 
 app.MapControllers();
 
