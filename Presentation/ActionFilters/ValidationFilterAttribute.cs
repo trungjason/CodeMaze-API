@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Presentation.ActionFilters
 {
+    // This Validation Filter will validate is in action params
+    // contain an arguments with DTO type =>
+    // it will check if the param is null or modelState is Valid 
+    // then throw correctsponding error message
     public class ValidationFilterAttribute : IActionFilter
     {
         public ValidationFilterAttribute()

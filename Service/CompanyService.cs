@@ -5,6 +5,7 @@ using Entities.Exceptions.BadRequest;
 using Entities.Models;
 using Service.Contracts;
 using Shared.DataTransferObjects;
+using Shared.RequestFeatures;
 
 namespace Service
 {
@@ -28,13 +29,13 @@ namespace Service
         #endregion
 
         #region Get All
-        public async Task<IEnumerable<CompanyDTO>> GetAllCompaniesAsync(bool trackChanges)
+        public async Task<(IEnumerable<CompanyDTO> companies, MetaData metaData)> GetAllCompaniesAsync(CompanyParameters companyParameters , bool trackChanges)
         {
-            var companies = await _repository.Company.GetAllCompaniesAsync(trackChanges);
+            var companiesWithMetaData = await _repository.Company.GetAllCompaniesAsync(companyParameters, trackChanges);
 
-            var companiesDTO = _mapper.Map<IEnumerable<CompanyDTO>>(companies);
+            var companiesDTO = _mapper.Map<IEnumerable<CompanyDTO>>(companiesWithMetaData);
 
-            return companiesDTO;
+            return (companiesDTO, companiesWithMetaData.MetaData);
         }
         #endregion
 

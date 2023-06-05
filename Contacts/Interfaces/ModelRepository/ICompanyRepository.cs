@@ -1,11 +1,12 @@
 ﻿using Entities.Models;
+using Shared.RequestFeatures;
 
 namespace Contacts.Interfaces.ModelRepository
 {
     public interface ICompanyRepository
     {
         #region Get All
-        Task<IEnumerable<Company>> GetAllCompaniesAsync(bool trackChanges);
+        Task<PagedList<Company>> GetAllCompaniesAsync(CompanyParameters companyParameters, bool trackChanges);
         
         Task<IEnumerable<Company>> GetByIdsAsync(IEnumerable<Guid> ids, bool trackChanges);
         #endregion

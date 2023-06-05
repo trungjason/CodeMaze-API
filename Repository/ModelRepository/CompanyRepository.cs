@@ -1,6 +1,7 @@
 ﻿using Contacts.Interfaces.ModelRepository;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
+using Shared.RequestFeatures;
 
 namespace Repository.ModelRepository
 {
@@ -13,9 +14,18 @@ namespace Repository.ModelRepository
         #endregion
 
         #region Get All
-        public async Task<IEnumerable<Company>> GetAllCompaniesAsync(bool trackChanges)
+        public async Task<PagedList<Company>> GetAllCompaniesAsync(CompanyParameters companyParameters, bool trackChanges)
         {
-            return await FindAll(trackChanges).OrderBy(company => company.Name).ToListAsync();
+            var companies = await FindAll(trackChanges)
+                .OrderBy(company => company.Name)
+                .Skip((companyParameters.PageSize - 1) * companyParameters.PageNumber)
+                .Take(companyParameters.PageSize)
+                .ToListAsync();
+
+            var count = await FindAll(trackChanges).CountAsync();
+
+
+            return PagedList<Company>.ToPagedList(companies, count, pageNumber: companyParameters.PageNumber, pageSize: companyParameters.PageSize);
         }
 
         public async Task<IEnumerable<Company>> GetByIdsAsync(IEnumerable<Guid> ids, bool trackChanges)

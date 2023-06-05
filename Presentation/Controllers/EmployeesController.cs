@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.JsonPatch;
+﻿using Entities.LinkModels;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.ActionFilters;
 using Service.Contracts;
 using Shared.DataTransferObjects;
 using Shared.RequestFeatures;
+using System.Text.Json;
 
 namespace Presentation.Controllers
 {
@@ -22,16 +24,27 @@ namespace Presentation.Controllers
 
         #region Get All
         [HttpGet]
+        [ServiceFilter(typeof(ValidateMediaTypeAttribute))]
         public async Task<IActionResult> GetEmployeesForCompany(
             Guid companyId, 
             [FromQuery] 
             EmployeeParameters employeeParameters
             )
         {
-            var employees = await _serviceManager.EmployeeService.GetEmployeesAsync(
-                companyId, employeeParameters, trackChanges: false);
+            var linkParams = new LinkParameters(employeeParameters, HttpContext);
 
-            return Ok(employees);
+            //var pagedResult = await _serviceManager.EmployeeService.GetEmployeesAsync(companyId,
+            //                            linkParams, trackChanges: false);
+
+            var result = await _serviceManager.EmployeeService.GetEmployeesAsync(companyId,
+                                    linkParams, trackChanges: false);
+
+
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(result.metaData));
+
+            return result.linkResponse.HasLinks ?   Ok(result.linkResponse.LinkedEntities) :
+                                                    Ok(result.linkResponse.ShapedEntities);
+
         }
         #endregion
 

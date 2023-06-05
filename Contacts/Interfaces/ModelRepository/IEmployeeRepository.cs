@@ -6,7 +6,7 @@ namespace Contacts.Interfaces.ModelRepository
     public interface IEmployeeRepository
     {
         #region Get All
-        Task<IEnumerable<Employee>> GetEmployeesAsync(Guid companyId, EmployeeParameters employeeParameters, bool trackChanges);
+        Task<PagedList<Employee>> GetEmployeesAsync(Guid companyId, EmployeeParameters employeeParameters, bool trackChanges);
         #endregion
 
         #region Get By

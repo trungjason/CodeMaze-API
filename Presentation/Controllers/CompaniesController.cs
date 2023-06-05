@@ -3,6 +3,8 @@ using Presentation.ActionFilters;
 using Presentation.ModelBinders;
 using Service.Contracts;
 using Shared.DataTransferObjects;
+using Shared.RequestFeatures;
+using System.Text.Json;
 
 namespace Presentation.Controllers
 {
@@ -21,11 +23,18 @@ namespace Presentation.Controllers
 
         #region Get All
         [HttpGet]
-        public async Task<IActionResult> GetCompanies()
+        // HttpHead return no response in the body (ASP.NET Core) will automatic handle that for us
+        // This method is used to  obtain information about validity, accessibility,
+        //and recent modifications of the resource. The response must be exactly like GET Method
+        // but without body response
+        [HttpHead]
+        public async Task<IActionResult> GetCompanies([FromQuery] CompanyParameters companyParameters)
         {
-            var companies = await _serviceManager.CompanyService.GetAllCompaniesAsync(trackChanges: false);
+            var companiesWithMetaData = await _serviceManager.CompanyService.GetAllCompaniesAsync(companyParameters, trackChanges: false);
 
-            return Ok(companies);
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(companiesWithMetaData.metaData));
+
+            return Ok(companiesWithMetaData.companies);
         }
 
         [HttpGet("collection/({ids})", Name = "CompanyCollection")]
@@ -83,9 +92,21 @@ namespace Presentation.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> DeleteCompany(Guid id)
         {
-           await _serviceManager.CompanyService.DeleteCompanyAsync(id, false);
+            await _serviceManager.CompanyService.DeleteCompanyAsync(id, false);
 
             return NoContent();
+        }
+        #endregion
+
+        #region Option
+        // This Action will be used be Client to check which method 
+        // that our API route support
+        [HttpOptions]
+        public IActionResult GetCompaniesOptions()
+        {
+            Response.Headers.Add("Allow", "GET, OPTIONS, POST, DELETE");
+
+            return Ok();
         }
         #endregion
     }

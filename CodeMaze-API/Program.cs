@@ -6,6 +6,9 @@ using NLog;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Options;
 using Presentation.ActionFilters;
+using Service.DataShaping;
+using Shared.DataTransferObjects;
+using CodeMaze_API.Utility;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,11 +32,26 @@ builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureSqlContext(builder.Configuration);
 
+builder.Services.AddCustomMediaTypes();
+
 // ----- Filter -----
 builder.Services.AddScoped<ValidationFilterAttribute>();
+builder.Services.AddScoped<ValidateMediaTypeAttribute>();
 
+// ----- DI Class -----
+builder.Services.AddScoped<IDataShaper<EmployeeDTO>, DataShaper<EmployeeDTO>>();
+builder.Services.AddScoped<IEmployeeLinks, EmployeeLinks>();
 builder.Services.AddAutoMapper(typeof(Program));
 
+// ----- API Config -----
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    // This will disable default validate model state when using [ApiController] Attribute
+    // => It will allow us to return customer error message
+    options.SuppressModelStateInvalidFilter = true;
+});
+
+// ----- Controller Config -----
 builder.Services.AddControllers(configs =>
 {
     configs.RespectBrowserAcceptHeader = true;
@@ -45,13 +63,7 @@ builder.Services.AddControllers(configs =>
     .AddCustomCSVFormatter()
     .AddApplicationPart(typeof(Presentation.AssemblyReference).Assembly);
 
-builder.Services.Configure<ApiBehaviorOptions>(options =>
-{
-    // This will disable default validate model state when using [ApiController] Attribute
-    // => It will allow us to return customer error message
-    options.SuppressModelStateInvalidFilter = true;
-});
-// ----- HTTP Request Pipeline
+// ----- HTTP Request Pipeline -----
 var app = builder.Build();
 
 var logger = app.Services.GetService<ILoggerManager>();

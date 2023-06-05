@@ -1,6 +1,7 @@
 ﻿using Contacts.Interfaces.ModelRepository;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
+using Repository.Extensions;
 using Shared.RequestFeatures;
 
 namespace Repository.ModelRepository
@@ -14,14 +15,22 @@ namespace Repository.ModelRepository
         #endregion
 
         #region Get All
-        public async Task<IEnumerable<Employee>> GetEmployeesAsync(
+        public async Task<PagedList<Employee>> GetEmployeesAsync(
             Guid companyId, EmployeeParameters employeeParameters, bool trackChanges)
         {
-            return await FindByCondition(employee => employee.CompanyId.Equals(companyId), trackChanges)
-                .OrderBy(employee => employee.Name)
-                .Skip((employeeParameters.PageNumber - 1 ) * employeeParameters.PageSize)
+            var employees = await FindByCondition((employee) => employee.CompanyId.Equals(companyId), trackChanges)
+                .FilterEmployeesByAgeRange(employeeParameters.MinAge, employeeParameters.MaxAge)
+                .SearchEmployeeByName(employeeParameters.SearchTerm)
+                .Sort(employeeParameters.OrderBy)
+                .Skip((employeeParameters.PageNumber - 1) * employeeParameters.PageSize)
                 .Take(employeeParameters.PageSize)
                 .ToListAsync();
+
+            // We Pagination first for better performance and in case we have million of data row
+            // then we will calculate count later for adding to metadata
+            var count = await FindByCondition(e => e.CompanyId.Equals(companyId), trackChanges).CountAsync();
+
+            return PagedList<Employee>.ToPagedList(employees, count, employeeParameters.PageNumber, employeeParameters.PageSize);
         }
         #endregion
 
