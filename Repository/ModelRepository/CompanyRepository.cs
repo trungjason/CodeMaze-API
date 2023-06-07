@@ -18,7 +18,7 @@ namespace Repository.ModelRepository
         {
             var companies = await FindAll(trackChanges)
                 .OrderBy(company => company.Name)
-                .Skip((companyParameters.PageSize - 1) * companyParameters.PageNumber)
+                .Skip((companyParameters.PageNumber - 1) * companyParameters.PageSize)
                 .Take(companyParameters.PageSize)
                 .ToListAsync();
 

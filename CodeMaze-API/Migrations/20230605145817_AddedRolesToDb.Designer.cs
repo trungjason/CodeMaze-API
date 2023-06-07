@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Repository;
 
@@ -11,9 +12,11 @@ using Repository;
 namespace CodeMaze_API.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    partial class RepositoryContextModelSnapshot : ModelSnapshot
+    [Migration("20230605145817_AddedRolesToDb")]
+    partial class AddedRolesToDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -167,12 +170,6 @@ namespace CodeMaze_API.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("RefreshToken")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("RefreshTokenExpiryTime")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -225,15 +222,15 @@ namespace CodeMaze_API.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b09d115c-eb63-4b09-b4a3-1f19548de9ed",
-                            ConcurrencyStamp = "57cd9a04-f19b-41e8-a0cb-97c61cdd4dc7",
+                            Id = "f79d100f-e36f-4858-bb21-882855c99eb7",
+                            ConcurrencyStamp = "da56494d-e6de-475d-af8a-3f77aff51fd8",
                             Name = "Manager",
                             NormalizedName = "MANAGER"
                         },
                         new
                         {
-                            Id = "0fd9ca6c-8ddf-416d-a48e-ef2b4fde7852",
-                            ConcurrencyStamp = "a9bb9ee0-e812-4bf6-932a-8f6080ece9de",
+                            Id = "7160b87d-74d9-4354-97f2-1ea058b10f5b",
+                            ConcurrencyStamp = "dbb12ebb-e203-4252-82fa-5326e82f735c",
                             Name = "Administrator",
                             NormalizedName = "ADMINISTRATOR"
                         });
