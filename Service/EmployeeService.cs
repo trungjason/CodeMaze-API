@@ -17,21 +17,18 @@ namespace Service
         private readonly IRepositoryManager _repository;
         private readonly ILoggerManager _logger;
         private readonly IMapper _mapper;
-        private readonly IDataShaper<EmployeeDTO> _dataShaper;
         private readonly IEmployeeLinks _employeeLinks;
 
         public EmployeeService(
             IRepositoryManager repository,
             ILoggerManager logger,
             IMapper mapper,
-            IDataShaper<EmployeeDTO> dataShaper,
             IEmployeeLinks employeeLinks
             )
         {
             _repository = repository;
             _logger = logger;
             _mapper = mapper;
-            _dataShaper = dataShaper;
             _employeeLinks = employeeLinks;
         }
         #endregion

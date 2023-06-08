@@ -7,7 +7,7 @@
 
         public int PageNumber { get; set; } = 1;
 
-        private int _pageSize;
+        private int _pageSize = MAX_PAGE_SIZE;
 
         public int PageSize
         {
@@ -18,7 +18,7 @@
 
             set
             {
-                _pageSize = value > MAX_PAGE_SIZE ? MAX_PAGE_SIZE : value;
+                _pageSize = (value > MAX_PAGE_SIZE) || value == 0 ? MAX_PAGE_SIZE : value;
             }
         }
         #endregion

@@ -4,6 +4,9 @@ using Repository;
 
 namespace CodeMaze_API.ContextFactory
 {
+    // We are using the IDesignTimeDbContextFactory<out TContext>
+    // interface that allows design-time services to discover implementations of this interface.
+    // TContext = RepositoryContext
     public class RepositoryContextFactory : IDesignTimeDbContextFactory<RepositoryContext>
     {
         public RepositoryContext CreateDbContext(string[] args)

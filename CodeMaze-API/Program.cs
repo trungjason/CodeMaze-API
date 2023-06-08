@@ -24,7 +24,8 @@ NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter() =>
         .GetRequiredService<IOptions<MvcOptions>>().Value.InputFormatters
         .OfType<NewtonsoftJsonPatchInputFormatter>().First();
 
-// Add services to the container.
+// ----- SERVICE CONFIGURATION ------
+#region Extension Service
 // ----- Extensions Service -----
 builder.Services.ConfigureCors();
 builder.Services.ConfigureISSIntegration();
@@ -32,23 +33,38 @@ builder.Services.ConfigureLoggerService();
 builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
 builder.Services.ConfigureSqlContext(builder.Configuration);
+#endregion
+
+#region API Versioning
 // -- API Versioning
 builder.Services.ConfigureVersioning();
+#endregion
+
+#region Caching
 // -- Caching
 builder.Services.ConfigureResponseCaching();
 builder.Services.ConfigureHttpCacheHeaders();
+#endregion
+
+#region HATEOAS
 // -- HATEOAS
 builder.Services.AddCustomMediaTypes();
+#endregion
 
+#region Filter
 // ----- Filter -----
 builder.Services.AddScoped<ValidationFilterAttribute>();
 builder.Services.AddScoped<ValidateMediaTypeAttribute>();
+#endregion
 
+#region DI Class
 // ----- DI Class -----
 builder.Services.AddScoped<IDataShaper<EmployeeDTO>, DataShaper<EmployeeDTO>>();
 builder.Services.AddScoped<IEmployeeLinks, EmployeeLinks>();
 builder.Services.AddAutoMapper(typeof(Program));
+#endregion
 
+#region API Config
 // ----- API Config -----
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
@@ -56,13 +72,23 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     // => It will allow us to return customer error message
     options.SuppressModelStateInvalidFilter = true;
 });
-// ----- Rate Limit ----- (Because RateLimit use Mememory to store options, counter, rules)
-// => We have to enable memoryCache
+#endregion
+
+#region Rate Limit
+// ----- Rate Limit ----- 
+// (Because RateLimit use Mememory to store options, counter, rules) => We have to enable memoryCache
 builder.Services.AddMemoryCache();
 builder.Services.ConfigureRateLimitingOptions();
 builder.Services.AddHttpContextAccessor();
+#endregion
 
+#region Identity
+// ---- Identity -----
+builder.Services.AddAuthentication();
+builder.Services.ConfigureIdentity();
+#endregion
 
+#region Controller Config
 // ----- Controller Config -----
 builder.Services.AddControllers(configs =>
 {
@@ -82,6 +108,16 @@ builder.Services.AddControllers(configs =>
     .AddXmlDataContractSerializerFormatters()
     .AddCustomCSVFormatter()
     .AddApplicationPart(typeof(Presentation.AssemblyReference).Assembly);
+#endregion
+
+#region JWT
+builder.Services.ConfigureJWT(builder.Configuration);
+builder.Services.AddJWTConfiguration(builder.Configuration);
+#endregion
+
+#region Swagger
+builder.Services.ConfigureSwagger();
+#endregion
 
 // ----- HTTP Request Pipeline -----
 var app = builder.Build();
@@ -109,6 +145,16 @@ app.UseCors("MyCorsPolicy");
 // Microsoft recommend we should use responseCaching after CORS middleware
 app.UseResponseCaching();
 app.UseHttpCacheHeaders();
+
+app.UseSwagger();
+app.UseSwaggerUI(s =>
+{
+    s.SwaggerEndpoint("/swagger/v1/swagger.json", "Code Maze API v1");
+    s.SwaggerEndpoint("/swagger/v2/swagger.json", "Code Maze API v2");
+});
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

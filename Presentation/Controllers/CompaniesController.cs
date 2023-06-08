@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Presentation.ActionFilters;
 using Presentation.ModelBinders;
 using Service.Contracts;
@@ -15,6 +16,8 @@ namespace Presentation.Controllers
     // This will apply to all action except GetCompanies because we specify an 
     // another Cache Attribute there => it will override this setting
     [ResponseCache(CacheProfileName = "120SecondsDuration")]
+    [Authorize]
+    [ApiExplorerSettings(GroupName = "v1")]
     public class CompaniesController : ControllerBase
     {
         #region Constructor
@@ -27,6 +30,10 @@ namespace Presentation.Controllers
         #endregion
 
         #region Get All
+        /// <summary>
+        /// Gets the list of all companies
+        /// </summary>
+        /// <returns>The companies list</returns>
         [HttpGet]
         // HttpHead return no response in the body (ASP.NET Core) will automatic handle that for us
         // This method is used to  obtain information about validity, accessibility,
@@ -67,7 +74,18 @@ namespace Presentation.Controllers
         #endregion
 
         #region Create
+        /// <summary>
+        /// Creates a newly created company
+        /// </summary>
+        /// <param name="company"></param>
+        /// <returns>A newly created company</returns>
+        /// <response code="201">Returns the newly created item</response>
+        /// <response code="400">If the item is null</response>
+        /// <response code="422">If the model is invalid</response>
         [HttpPost]
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(422)]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> CreateCompany([FromBody] CreateCompanyDTO createCompanyDTO)
         {
